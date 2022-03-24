@@ -1,0 +1,41 @@
+package org.search.engine.relational.dao;
+
+import lombok.extern.slf4j.Slf4j;
+import org.search.engine.relational.domain.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+@Slf4j
+public class DocumentDaoImpl implements DocumentDao {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    public DocumentDaoImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public List<Document> readAll() {
+        return null;
+    }
+
+    @Override
+    public Document read(Long docId) {
+        return null;
+    }
+
+    @Override
+    public void create(Document document) {
+        String insertQuery = "insert into document (id) values (?)";
+        jdbcTemplate.update(insertQuery, document.getDocId());
+    }
+
+    @Override
+    public void delete(Long docId) {
+    }
+}
