@@ -13,23 +13,23 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     public static final String EXCHANGE_NAME = "result.exchange";
-    public static final String QUEUE_NAME = "result_queue";
+    public static final String QUEUE_NAME = "result";
     public static final String ROUTING_KEY = "result.routing_key";
 
     @Bean
-    public DirectExchange exchange() {
-        return new DirectExchange(EXCHANGE_NAME);
+    public TopicExchange exchange() {
+        return new TopicExchange(EXCHANGE_NAME);
     }
 
     @Bean
     public Queue queue() {
-        return new Queue(QUEUE_NAME);
+        return new Queue(QUEUE_NAME, false, false, false);
     }
 
     @Bean
-    public Binding binding(Queue queue, DirectExchange directExchange) {
+    public Binding binding(Queue queue, TopicExchange topicExchange) {
         return BindingBuilder.bind(queue)
-                .to(directExchange)
+                .to(topicExchange)
                 .with(ROUTING_KEY);
     }
 
@@ -45,4 +45,6 @@ public class RabbitMQConfig {
         rabbitTemplate.setMessageConverter(messageConverter());
         return rabbitTemplate;
     }
+
+
 }

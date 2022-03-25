@@ -1,8 +1,11 @@
 package org.search.engine.relational.dao;
 
+import org.search.engine.relational.builder.index.IndexSql;
+import org.search.engine.relational.builder.query.QuerySql;
 import org.search.engine.relational.domain.DocumentToken;
 
 import java.util.List;
+import java.util.Map;
 
 public interface DocumentTokenDao {
 
@@ -13,4 +16,12 @@ public interface DocumentTokenDao {
     void create(DocumentToken documentToken);
 
     void delete(DocumentToken documentToken);
+
+    List<DocumentToken> readAll(String sql);
+
+    List<DocumentToken> readAll(QuerySql query);
+
+    int create(List<String> sqlList);
+
+    int create(Map<String, IndexSql> map);
 }
