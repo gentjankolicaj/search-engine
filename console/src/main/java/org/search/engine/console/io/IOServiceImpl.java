@@ -14,9 +14,7 @@ import org.search.engine.console.util.ResourceUtil;
 import org.search.engine.console.writer.ConsoleWriter;
 import org.search.engine.console.writer.Writer;
 
-import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.TimeoutException;
 
 
 public class IOServiceImpl implements IOService {
@@ -79,13 +77,14 @@ public class IOServiceImpl implements IOService {
                         String json = JsonUtil.toJson(message);
                         channel.basicPublish(exchange, routingKey, null, json.getBytes());
                     } catch (CommandParseException cpe) {
-                        cpe.printStackTrace();
+                        writer.write("index error " + cpe.getMessage());
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        writer.write("Unexpected error " + e.getMessage() + ".Proceeding to shutdown...");
                         break;
                     }
                 }
-
+                channel.close();
+                System.exit(-1);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -120,26 +119,15 @@ public class IOServiceImpl implements IOService {
                         }
                     }
                 };
-
                 channel.basicConsume(queueName, true, consumer);
+
 
             } catch (Exception e) {
                 e.printStackTrace();
 
-                if (channel != null) {
-                    try {
-                        channel.close();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    } catch (TimeoutException ex) {
-                        ex.printStackTrace();
-                    }
-                }
             }
 
         }
-
-
     }
 
 }
