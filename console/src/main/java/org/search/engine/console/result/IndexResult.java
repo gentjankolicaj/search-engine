@@ -9,7 +9,6 @@ public class IndexResult implements Result<Object> {
     private Integer type;
     private List<Object> results;
 
-
     @Override
     public Integer getType() {
         return type;

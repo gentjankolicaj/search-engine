@@ -5,10 +5,11 @@ import org.search.engine.console.command.Command;
 import org.search.engine.console.command.CommandParser;
 import org.search.engine.console.command.CommandParserImpl;
 import org.search.engine.console.exception.CommandParseException;
+import org.search.engine.console.exception.IndexParseException;
+import org.search.engine.console.exception.QueryParseException;
 import org.search.engine.console.message.Message;
 import org.search.engine.console.reader.ConsoleReader;
 import org.search.engine.console.reader.Reader;
-import org.search.engine.console.result.Result;
 import org.search.engine.console.util.JsonUtil;
 import org.search.engine.console.util.ResourceUtil;
 import org.search.engine.console.writer.ConsoleWriter;
@@ -21,7 +22,6 @@ public class IOServiceImpl implements IOService {
     private final Reader reader;
     private final Writer writer;
     private final CommandParser commandParser;
-
     private final Connection connection;
 
     public IOServiceImpl(Connection connection) {
@@ -34,7 +34,7 @@ public class IOServiceImpl implements IOService {
 
     @Override
     public void run() throws Exception {
-        this.writer.write("### Connected to message broker.");
+        this.writer.write("### Connected to RabbitMQ message broker.");
         Thread publisherThread = new PublisherThread();
         Thread consumerThread = new ConsumerThread();
         publisherThread.start();
@@ -76,10 +76,14 @@ public class IOServiceImpl implements IOService {
                         Message<Object, Command> message = new Message<>(null, command);
                         String json = JsonUtil.toJson(message);
                         channel.basicPublish(exchange, routingKey, null, json.getBytes());
+                    } catch (QueryParseException qpe) {
+                        writer.write("query error '" + qpe.getMessage() + "'");
+                    } catch (IndexParseException ipe) {
+                        writer.write("index error '" + ipe.getMessage() + "'");
                     } catch (CommandParseException cpe) {
-                        writer.write("index error " + cpe.getMessage());
+                        writer.write("Command parse exception.'" + cpe.getMessage());
                     } catch (Exception e) {
-                        writer.write("Unexpected error " + e.getMessage() + ".Proceeding to shutdown...");
+                        writer.write("Unexpected exception " + e.getMessage() + ".Proceeding to shutdown...");
                         break;
                     }
                 }
@@ -112,21 +116,17 @@ public class IOServiceImpl implements IOService {
                     public void handleDelivery(String consumerTag, Envelope envelope,
                                                AMQP.BasicProperties properties, byte[] body) {
                         try {
-                            Message<Object, Result> message = JsonUtil.fromJsonToObject(body);
-                            writer.write(message);
+                            writer.write(body);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                 };
                 channel.basicConsume(queueName, true, consumer);
-
-
             } catch (Exception e) {
                 e.printStackTrace();
 
             }
-
         }
     }
 

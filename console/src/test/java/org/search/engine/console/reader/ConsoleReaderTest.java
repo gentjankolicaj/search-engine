@@ -3,10 +3,7 @@ package org.search.engine.console.reader;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.search.engine.console.command.Command;
 import org.search.engine.console.command.CommandParser;
@@ -25,7 +22,6 @@ class ConsoleReaderTest {
     Reader<Command> reader;
     CommandParser commandParser;
 
-    @Mock
     BufferedReader bufferedReader;
 
 
@@ -44,10 +40,8 @@ class ConsoleReaderTest {
     void tearDown() {
     }
 
-    //todo : to fully implement
-    @Test
+    //todo : to fully implement with mocking
     void read() throws IOException {
-        Mockito.when(bufferedReader.readLine()).thenReturn("index 1 banana apple orange", "index 1 banana apple.orange", "query butter milk orange", "query (butter | potato) & salt", "", "   ");
 
         Command command0 = reader.read();
         assertNotNull(command0, "Command read is null");

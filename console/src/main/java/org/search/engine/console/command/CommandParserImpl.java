@@ -1,6 +1,8 @@
 package org.search.engine.console.command;
 
 import org.search.engine.console.exception.CommandParseException;
+import org.search.engine.console.exception.IndexParseException;
+import org.search.engine.console.exception.QueryParseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,22 +28,20 @@ public class CommandParserImpl implements CommandParser {
 
         if (isIndex(inputList.get(0))) {
             if (inputList.size() <= 2)
-                throw new CommandParseException("Can't parse input.Command 'index' must have at least 'index_value' and token.Example : index 1 apple");
+                throw new IndexParseException("Can't parse input.Command 'index' must have at least 'index_value' and token.Example : index 1 apple");
             if (!isInteger(inputList.get(1)))
-                throw new CommandParseException("Can't parse input.'" + inputList.get(1) + "' not valid as index value.");
+                throw new IndexParseException("Can't parse input.'" + inputList.get(1) + "' not valid as index value.");
             for (int i = 2; i < inputList.size(); i++) {
                 String s = inputList.get(i);
                 if (!isAlphaNumeric(s))
-                    throw new CommandParseException("Can't parse input." + s + " contains non-alpha numeric characters");
+                    throw new IndexParseException("Can't parse input." + s + " contains non-alpha numeric characters");
             }
             return new ConsoleCommand(1, inputList);
         } else if (isQuery(inputList.get(0))) {
             if (inputList.size() <= 1)
-                throw new CommandParseException("Can't parse input.Command 'query' must have at least 'query' and token.Example : query apple");
+                throw new QueryParseException("Can't parse input.Command 'query' must have at least 'query' and token.Example : query apple");
             //Query with single token
-            if (inputList.size() == 2) {
-                return new ConsoleCommand(2, inputList);
-            } else {
+            if (inputList.size() != 2) {
                 int tokenCounter = 0;
                 int prefixParenthesisCounter = 0;
                 int suffixParenthesisCounter = 0;
@@ -62,7 +62,7 @@ public class CommandParserImpl implements CommandParser {
                         if (isAlphaNumeric(s))
                             tokenCounter++;
                         else
-                            throw new CommandParseException("Can't parse input.'" + s + "' contains non alpha-numeric characters");
+                            throw new QueryParseException("Can't parse input.'" + s + "' contains non alpha-numeric characters");
                     }
                 }
                 //tokenCounter counts total alphanumeric tokens
@@ -77,8 +77,8 @@ public class CommandParserImpl implements CommandParser {
                 //Check for &/| total number and if are in right index
                 validateSetOperations(operationCounter, tokenCounter, inputList.subList(1, inputList.size()));
 
-                return new ConsoleCommand(2, inputList);
             }
+            return new ConsoleCommand(2, inputList);
         } else
             throw new CommandParseException("Can't parse unknown input" + inputList.get(0));
 
@@ -87,9 +87,9 @@ public class CommandParserImpl implements CommandParser {
 
     private void validateParenthesis(int prefixParenthesisCounter, int suffixParenthesisCounter, int tokenCounter, List<String> inputList) {
         if (prefixParenthesisCounter != (tokenCounter / 2))
-            throw new CommandParseException("Can't parse input.Command 'query' must have a total of " + (tokenCounter / 2) + " '(' not " + prefixParenthesisCounter);
+            throw new QueryParseException("Can't parse input.Command 'query' must have a total of " + (tokenCounter / 2) + " '(' not " + prefixParenthesisCounter);
         if (suffixParenthesisCounter != (tokenCounter / 2))
-            throw new CommandParseException("Can't parse input.Command 'query' must have a total of " + (tokenCounter / 2) + " ')' not " + suffixParenthesisCounter);
+            throw new QueryParseException("Can't parse input.Command 'query' must have a total of " + (tokenCounter / 2) + " ')' not " + suffixParenthesisCounter);
 
         else {
             //Prefix parenthesis index rule : i*6
@@ -103,10 +103,10 @@ public class CommandParserImpl implements CommandParser {
                 String s1 = inputList.get(prefixParenthesisIndex);
                 String s2 = inputList.get(suffixParenthesisIndex);
                 if (!s1.equals(prefixParenthesis)) {
-                    throw new CommandParseException("Can't parse input.Command 'query' must have ( at index " + prefixParenthesisIndex);
+                    throw new QueryParseException("Can't parse input.Command 'query' must have ( at index " + prefixParenthesisIndex);
                 }
                 if (!s2.equals(suffixParenthesis)) {
-                    throw new CommandParseException("Can't parse input.Command 'query' must have ) at index " + suffixParenthesisIndex);
+                    throw new QueryParseException("Can't parse input.Command 'query' must have ) at index " + suffixParenthesisIndex);
                 }
             }
         }
@@ -115,7 +115,7 @@ public class CommandParserImpl implements CommandParser {
 
     private void validateSetOperations(int operationCounter, int tokenCounter, List<String> inputList) {
         if (operationCounter != (tokenCounter - 1))
-            throw new CommandParseException("Can't parse input.Command 'query' must have a total of " + (tokenCounter - 1) + " '&' or '|' operations  not " + operationCounter);
+            throw new QueryParseException("Can't parse input.Command 'query' must have a total of " + (tokenCounter - 1) + " '&' or '|' operations  not " + operationCounter);
         else {
             //Operations index rule : 2*(i+i)+i
             String andOperation = "&";
@@ -125,7 +125,7 @@ public class CommandParserImpl implements CommandParser {
                 int operationIndex = 2 * (i + 1) + i;
                 String s = inputList.get(operationIndex);
                 if (!s.equals(andOperation) && !s.equals(orOperation)) {
-                    throw new CommandParseException("Can't parse input.Command 'query' must have '&' or '|' at index " + operationIndex);
+                    throw new QueryParseException("Can't parse input.Command 'query' must have '&' or '|' at index " + operationIndex);
                 }
             }
         }

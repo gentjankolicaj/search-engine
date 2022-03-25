@@ -5,10 +5,10 @@ import lombok.AllArgsConstructor;
 import java.util.List;
 
 @AllArgsConstructor
-public class QueryResult implements Result<Object> {
-
+public class QueryResult<O> implements Result<O> {
     private Integer type;
-    private List<Object> results;
+    private List<O> results;
+
 
     @Override
     public Integer getType() {
@@ -16,7 +16,7 @@ public class QueryResult implements Result<Object> {
     }
 
     @Override
-    public List<Object> getResults() {
+    public List<O> getResults() {
         return results;
     }
 }

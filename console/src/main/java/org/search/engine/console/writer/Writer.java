@@ -13,5 +13,7 @@ public interface Writer {
 
     void write(Message<Object, Result> message) throws IOException;
 
+    void write(byte[] input) throws IOException;
+
     void close() throws IOException;
 }

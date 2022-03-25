@@ -4,24 +4,27 @@ import org.search.engine.console.command.Command;
 import org.search.engine.console.command.CommandParser;
 import org.search.engine.console.message.Message;
 import org.search.engine.console.result.Result;
+import org.search.engine.console.util.JsonUtil;
+import org.search.engine.console.util.ResourceUtil;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class ConsoleWriter implements Writer {
     private final BufferedWriter bufferedWriter;
     private final CommandParser commandParser;
+    private final Properties properties;
 
-    public ConsoleWriter(BufferedWriter bufferedWriter, CommandParser commandParser) {
-        this.bufferedWriter = bufferedWriter;
-        this.commandParser = commandParser;
-    }
 
     public ConsoleWriter(CommandParser commandParser) {
         this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(System.out));
         this.commandParser = commandParser;
+        this.properties = ResourceUtil.getApplicationProperties();
     }
 
     @Override
@@ -40,24 +43,51 @@ public class ConsoleWriter implements Writer {
 
     @Override
     public void write(Message<Object, Result> message) throws IOException {
+
+    }
+
+    @Override
+    public void write(byte[] input) throws IOException {
+        Message message = JsonUtil.fromJsonToObject(input);
         Object body = message.getBody();
-        if (body == null)
-            return;
-        if (body instanceof LinkedHashMap) {
-            LinkedHashMap linkedHashMap = (LinkedHashMap) body;
+        if (body != null && body instanceof LinkedHashMap) {
+            LinkedHashMap linkedHashMap = (LinkedHashMap) message.getBody();
             Integer type = linkedHashMap.get("type") != null ? (Integer) linkedHashMap.get("type") : 0;
-
             if (type == 1)
-                bufferedWriter.write("->[*] index " + linkedHashMap.get("results") + "\n");
-            else if (type == 2)
-                bufferedWriter.write("->[$] query result " + linkedHashMap.get("results") + "\n");
+                bufferedWriter.write("-> index " + linkedHashMap.get("results") + "\n");
+            else if (type == 2) {
+                Object values = linkedHashMap.get("results");
+                if (values != null && values instanceof List) {
+                    List<?> valuesList = (List) values;
+                    if (isId()) {
+                        List<Integer> documentIds = valuesList.stream().map(d -> {
+                            if (d instanceof LinkedHashMap)
+                                return (Integer) ((LinkedHashMap) d).get("documentId");
+                            else
+                                return 0;
+                        }).distinct().collect(Collectors.toList());
+                        bufferedWriter.write("-> query result " + documentIds + "\n");
+                    } else
+                        bufferedWriter.write("-> query result " + linkedHashMap.get("results") + "\n");
+                } else
+                    bufferedWriter.write("-> query result \n");
 
+            } else if (type == -1)
+                bufferedWriter.write("-> index error" + linkedHashMap.get("results") + "\n");
+            else if (type == -2)
+                bufferedWriter.write("-> query error " + linkedHashMap.get("results") + "\n");
+
+            bufferedWriter.flush();
         }
-        bufferedWriter.flush();
     }
 
     @Override
     public void close() throws IOException {
         bufferedWriter.close();
+    }
+
+    private boolean isId() {
+        String resultShow = properties.getProperty("query.result.show");
+        return resultShow.contains("id");
     }
 }
