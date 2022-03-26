@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class RabbitMQConsumer {
-
     private static final String consumeQueue = "command";
 
     private final IndexService indexService;
