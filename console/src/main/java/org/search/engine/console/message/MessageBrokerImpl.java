@@ -31,7 +31,7 @@ public class MessageBrokerImpl implements MessageBroker {
 
     @Override
     public void disconnect() throws IOException {
-        if (connection.isOpen()) {
+        if (connection!=null && connection.isOpen()) {
             this.connection.close();
         } else
             throw new IOException("Connection with message broker not closed.");

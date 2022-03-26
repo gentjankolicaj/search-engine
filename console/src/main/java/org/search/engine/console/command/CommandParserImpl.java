@@ -11,11 +11,11 @@ public class CommandParserImpl implements CommandParser {
 
     private final static String alphaNumericRegex = "^[a-zA-Z0-9.]+$";
 
+
     @Override
     public Command parse(String input, String regex) throws CommandParseException {
         return null;
     }
-
 
     @Override
     public Command parse(String input) throws CommandParseException {
