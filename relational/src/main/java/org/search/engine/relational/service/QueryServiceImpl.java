@@ -34,7 +34,6 @@ public class QueryServiceImpl implements QueryService {
         log.info("Query with command " + command + " executed.");
         try {
             List<String> params = command.getParams();
-
             //Get sublist without token keyword
             QuerySql<String> querySql = queryBuilder.setParams(params)
                     .build();

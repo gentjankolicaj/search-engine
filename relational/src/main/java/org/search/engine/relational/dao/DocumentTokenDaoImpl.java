@@ -58,12 +58,11 @@ public class DocumentTokenDaoImpl implements DocumentTokenDao {
     }
 
     @Override
-    public int create(Map<String, IndexSql> map) {
+    public void update(Map<String, IndexSql> map) {
         IndexSql<String> insertDoc = map.get("insert_document");
         IndexSql<List<String>> insertTokens = map.get("insert_token");
         IndexSql<String> deleteDocToken = map.get("delete_document_token");
         IndexSql<String> insertDocToken = map.get("insert_document_token");
-
         try {
             //Insert new doc_id into document table
             jdbcTemplate.update(insertDoc.getQuery(), insertDoc.getArgs());
@@ -81,7 +80,7 @@ public class DocumentTokenDaoImpl implements DocumentTokenDao {
                 }
             }
             //Insert new document tokens into document_tokens table
-            return jdbcTemplate.update(insertDocToken.getQuery(), insertDocToken.getArgs());
+            jdbcTemplate.update(insertDocToken.getQuery(), insertDocToken.getArgs());
 
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -102,9 +101,8 @@ public class DocumentTokenDaoImpl implements DocumentTokenDao {
                 }
             }
             //Insert new document tokens into document_tokens table
-            return jdbcTemplate.update(insertDocToken.getQuery(), insertDocToken.getArgs());
+            jdbcTemplate.update(insertDocToken.getQuery(), insertDocToken.getArgs());
         }
-
     }
 
 

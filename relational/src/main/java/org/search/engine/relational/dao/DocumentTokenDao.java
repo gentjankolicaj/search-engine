@@ -23,5 +23,5 @@ public interface DocumentTokenDao {
 
     int create(List<String> sqlList);
 
-    int create(Map<String, IndexSql> map);
+    void update(Map<String, IndexSql> map);
 }

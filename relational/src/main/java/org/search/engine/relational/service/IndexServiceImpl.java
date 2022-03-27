@@ -37,7 +37,7 @@ public class IndexServiceImpl implements IndexService {
             List<String> params = command.getParams();
             Map<String, IndexSql> queryMap = indexBuilder.setParams(params)
                     .build();
-            int result = documentTokenDao.create(queryMap);
+            documentTokenDao.update(queryMap);
             List<Object> results = new ArrayList<>();
             results.add("ok");
             results.add(params.get(1));

@@ -31,8 +31,6 @@ public class DocumentDaoImpl implements DocumentDao {
 
     @Override
     public void create(Document document) {
-        String insertQuery = "insert into document (id) values (?)";
-        jdbcTemplate.update(insertQuery, document.getDocId());
     }
 
     @Override
