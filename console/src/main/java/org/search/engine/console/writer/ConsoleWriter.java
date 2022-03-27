@@ -49,35 +49,45 @@ public class ConsoleWriter implements Writer {
     @Override
     public void write(byte[] input) throws IOException {
         Message message = JsonUtil.fromJsonToObject(input);
-        Object body = message.getBody();
-        if (body != null && body instanceof LinkedHashMap) {
-            LinkedHashMap linkedHashMap = (LinkedHashMap) message.getBody();
-            Integer type = linkedHashMap.get("type") != null ? (Integer) linkedHashMap.get("type") : 0;
-            if (type == 1)
-                bufferedWriter.write("-> index " + linkedHashMap.get("results") + "\n");
-            else if (type == 2) {
-                Object values = linkedHashMap.get("results");
-                if (values != null && values instanceof List) {
-                    List<?> valuesList = (List) values;
-                    if (isId()) {
-                        List<Integer> documentIds = valuesList.stream().map(d -> {
-                            if (d instanceof LinkedHashMap)
-                                return (Integer) ((LinkedHashMap) d).get("documentId");
-                            else
-                                return 0;
-                        }).distinct().collect(Collectors.toList());
-                        bufferedWriter.write("-> query result " + documentIds + "\n");
+        if(message!=null) {
+            Object body = message.getBody();
+            if (body instanceof LinkedHashMap) {
+                LinkedHashMap linkedHashMap = (LinkedHashMap) message.getBody();
+                Integer type = linkedHashMap.get("type") != null ? (Integer) linkedHashMap.get("type") : 0;
+                if (type == 1)
+                    bufferedWriter.write("-> index " + linkedHashMap.get("results") + "\n");
+                else if (type == 2) {
+                    Object values = linkedHashMap.get("results");
+                    if (values instanceof List) {
+                        List<?> valuesList = (List) values;
+                        if (isId()) {
+                            List<Integer> documentIds = valuesList.stream().map(d -> {
+                                Integer docId = 0;
+                                if (d instanceof LinkedHashMap) {
+                                    Object value = ((LinkedHashMap) d).get("documentId");
+                                    if (value == null) {
+                                        value = ((LinkedHashMap) d).get("docId");
+                                    }
+                                    if (value != null)
+                                        docId = (Integer) value;
+                                }
+                                return docId;
+                            }).distinct().collect(Collectors.toList());
+                            bufferedWriter.write("-> query result " + documentIds + "\n");
+                        } else if (valuesList.size() == 0)
+                            bufferedWriter.write("-> query result \n");
+                        else
+                            bufferedWriter.write("-> query result " + linkedHashMap.get("results") + "\n");
                     } else
-                        bufferedWriter.write("-> query result " + linkedHashMap.get("results") + "\n");
-                } else
-                    bufferedWriter.write("-> query result \n");
+                        bufferedWriter.write("-> query result \n");
 
-            } else if (type == -1)
-                bufferedWriter.write("-> index error" + linkedHashMap.get("results") + "\n");
-            else if (type == -2)
-                bufferedWriter.write("-> query error " + linkedHashMap.get("results") + "\n");
+                } else if (type == -1)
+                    bufferedWriter.write("-> index error" + linkedHashMap.get("results") + "\n");
+                else if (type == -2)
+                    bufferedWriter.write("-> query error " + linkedHashMap.get("results") + "\n");
 
-            bufferedWriter.flush();
+                bufferedWriter.flush();
+            }
         }
     }
 

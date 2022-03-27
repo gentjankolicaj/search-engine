@@ -12,5 +12,4 @@ public class Message<H, B> {
     private H header;
     private B body;
 
-
 }

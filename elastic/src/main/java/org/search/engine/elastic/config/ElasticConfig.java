@@ -1,13 +1,12 @@
 package org.search.engine.elastic.config;
 
 
-import lombok.Data;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 //Just in case config,not useful right now
 @Configuration
-@Data
 public class ElasticConfig {
 
     @Value("${spring.elasticsearch.rest.uris}")
@@ -24,6 +23,7 @@ public class ElasticConfig {
 
     @Value("${spring.elasticsearch.rest.read-timeout}")
     private int readTimeout;
+
 
 
 }

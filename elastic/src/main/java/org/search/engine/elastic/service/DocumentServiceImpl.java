@@ -2,6 +2,7 @@ package org.search.engine.elastic.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.search.engine.elastic.dao.DocumentDao;
+import org.search.engine.elastic.domain.Document;
 import org.search.engine.elastic.dto.command.Command;
 import org.search.engine.elastic.dto.result.IndexResult;
 import org.search.engine.elastic.dto.result.QueryResult;
@@ -33,7 +34,8 @@ public class DocumentServiceImpl implements DocumentService{
         log.info("Index called with command " + command);
         try {
             List<String> params = command.getParams();
-            //todo : to call documentDao.index(params) here.
+            Document document=getDocument(params);
+            documentDao.update(document);
             List<Object> results = new ArrayList<>();
             results.add("ok");
             results.add(params.get(1));
@@ -50,18 +52,37 @@ public class DocumentServiceImpl implements DocumentService{
 
     }
 
+
+
     @Override
     public void query(Command command) {
         log.info("Query with command " + command + " executed.");
         try {
             List<String> params = command.getParams();
-            //todo : to call documentDao.query(params) here.
-            rabbitMQProducer.produce(new QueryResult<>(2, null));
-            log.info("Published to result queue : " + null);
+            String query=getQueryStr(params);
+            List<Document> documents=documentDao.readAll(query);
+            rabbitMQProducer.produce(new QueryResult<>(2,documents));
+            log.info("Published to result queue : " + documents);
         } catch (Exception e) {
             log.error(e.getMessage());
             rabbitMQProducer.produce(new QueryResult<>(-2, Arrays.asList(e.getMessage())));
             log.info("Published to result queue : " + e.getMessage());
         }
+    }
+
+    private String getQueryStr(List<String> params){
+        List<String> tokens=params.subList(1,params.size());
+        String rawTokens=String.join("",tokens);
+        //replace parenthesis
+        rawTokens=rawTokens.replace("(","").replace(")","");
+        //replace & or |
+        rawTokens=rawTokens.replace("&"," AND ").replace("|"," OR ");
+        return rawTokens;
+    }
+
+    private Document getDocument(List<String> params) {
+        Long docId=Long.valueOf(params.get(1));
+        List<String> tokens=params.subList(2,params.size());
+        return new Document(docId,tokens);
     }
 }
