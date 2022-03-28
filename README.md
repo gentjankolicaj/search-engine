@@ -80,6 +80,11 @@ The program should accept a sequence of commands from standard input and respond
 
 
 ## Architecture
+### Console - elastic
+![Console & elastic](img/se-arch.drawio_elasticsearch.png)
+
+### Console - relational
+![Console & elastic](img/se-arch.drawio_mysql.png)
 
 
 
@@ -93,7 +98,7 @@ The program should accept a sequence of commands from standard input and respond
 
 ## TO RUN
 ```
-mvn clean install
+mvn -Dskiptests=true clean install
 ```
 
 <br>First run console app (To create messaging queues on RabbitMQ).Two message queues are created : command & result
@@ -142,13 +147,14 @@ User types commands on console.
 
 <br>
 
-####	Relational app:
+####	Relational app
 |          | 	Authentication | Authorization	 |      Comment |
 |----------|:---------------:|:--------------:|---------:|
 | RabbitMQ |     	Basic      |     	None      |          |
 | MYSQL    |     	Basic      |     	None      |          |
 
 
+<br>
 
 ###	Logging
 **console** : no logging provided.
