@@ -18,7 +18,6 @@ public class Application {
             Connection connection = messageBroker.connect();
             ioService = new IOServiceImpl(connection);
             ioService.run();
-
         } catch (Exception e) {
             e.printStackTrace();
             try {
