@@ -42,7 +42,6 @@ public class IOServiceImpl implements IOService {
         this.writer.write("### Publisher & Consumer thread started. To exit press CTRL+C ");
         this.writer.write("### To index type : index index_value token1 token2 .Ex : index 2222 orange apple ");
         this.writer.write("### To search type : query token or query (token1 '&' or '|' token2). Ex: query orange or query (apple | orange)");
-        this.writer.write("### To exit press CTRL+C ");
     }
 
     @Override

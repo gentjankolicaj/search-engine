@@ -80,7 +80,7 @@ public class CommandParserImpl implements CommandParser {
             }
             return new ConsoleCommand(2, inputList);
         } else
-            throw new CommandParseException("Can't parse unknown input" + inputList.get(0));
+            throw new CommandParseException("Can't parse unknown input " + inputList.get(0));
 
     }
 

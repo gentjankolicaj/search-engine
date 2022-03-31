@@ -5,6 +5,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.search.engine.elastic.domain.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -30,7 +31,11 @@ public class DocumentDaoImpl implements DocumentDao{
 
     @Override
     public void update(Document document) {
-        elasticsearchOperations.delete(""+document.getDocId(),Document.class);
+        try {
+            elasticsearchOperations.delete("" + document.getDocId(), Document.class);
+        }catch (NoSuchIndexException nsie){
+            log.error(nsie.getMessage());
+        }
         elasticsearchOperations.save(document,IndexCoordinates.of(DOCUMENT_INDEX));
     }
 

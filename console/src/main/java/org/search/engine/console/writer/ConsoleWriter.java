@@ -82,7 +82,7 @@ public class ConsoleWriter implements Writer {
                         bufferedWriter.write("-> query result \n");
 
                 } else if (type == -1)
-                    bufferedWriter.write("-> index error" + linkedHashMap.get("results") + "\n");
+                    bufferedWriter.write("-> index error " + linkedHashMap.get("results") + "\n");
                 else if (type == -2)
                     bufferedWriter.write("-> query error " + linkedHashMap.get("results") + "\n");
 

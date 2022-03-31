@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import java.io.Serializable;
 import java.util.List;
 
 @org.springframework.data.elasticsearch.annotations.Document(indexName = "search_data")
@@ -15,7 +16,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Document {
+public class Document implements Serializable {
 
     @Id
     @Field(type = FieldType.Long, name = "doc_id")
