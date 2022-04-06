@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class RabbitMQConsumer {
-    private static final String consumeQueue = "command";
+public class RabbitMQConsumer implements Consumer{
+    private static final String CONSUME_QUEUE = "command";
 
     private final DocumentService documentService;
     private final TaskExecutor taskExecutor;
@@ -24,7 +24,7 @@ public class RabbitMQConsumer {
         this.taskExecutor = taskExecutor;
     }
 
-    @RabbitListener(queues = consumeQueue, concurrency = "3")
+    @RabbitListener(queues = CONSUME_QUEUE, concurrency = "3")
     public void consume(Message<Object, ConsoleCommand> message) {
         ConsoleCommand consoleCommand = message.getBody();
         log.info("Command received " + consoleCommand);

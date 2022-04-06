@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class RabbitMQProducer {
-    private static final String produceQueue="result";
+public class RabbitMQProducer implements Producer{
+    private static final String PRODUCE_QUEUE="result";
     private final AmqpTemplate amqpTemplate;
 
     @Autowired
@@ -19,8 +19,8 @@ public class RabbitMQProducer {
         this.amqpTemplate = amqpTemplate;
     }
 
-    public void publish(Result result) {
-        amqpTemplate.convertAndSend(produceQueue, new Message<>(null, result));
-        log.info("Pushed to queue " + produceQueue + " : " + result);
+    public void produce(Result result) {
+        amqpTemplate.convertAndSend(PRODUCE_QUEUE, new Message<>(null, result));
+        log.info("Pushed to queue " + PRODUCE_QUEUE + " : " + result);
     }
 }

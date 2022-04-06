@@ -6,7 +6,7 @@ import org.search.engine.relational.builder.index.IndexSql;
 import org.search.engine.relational.dao.DocumentTokenDao;
 import org.search.engine.relational.dto.command.Command;
 import org.search.engine.relational.dto.result.IndexResult;
-import org.search.engine.relational.producer.RabbitMQProducer;
+import org.search.engine.relational.producer.Producer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,15 +17,14 @@ import java.util.Map;
 @Service
 @Slf4j
 public class IndexServiceImpl implements IndexService {
-
-    private final RabbitMQProducer rabbitMQProducer;
+    private final Producer producer;
     private final DocumentTokenDao documentTokenDao;
     private final IndexBuilder indexBuilder;
 
 
     @Autowired
-    public IndexServiceImpl(RabbitMQProducer rabbitMQProducer, DocumentTokenDao documentTokenDao, IndexBuilder indexBuilder) {
-        this.rabbitMQProducer = rabbitMQProducer;
+    public IndexServiceImpl(Producer producer, DocumentTokenDao documentTokenDao, IndexBuilder indexBuilder) {
+        this.producer = producer;
         this.documentTokenDao = documentTokenDao;
         this.indexBuilder = indexBuilder;
     }
@@ -41,16 +40,16 @@ public class IndexServiceImpl implements IndexService {
             List<Object> results = new ArrayList<>();
             results.add("ok");
             results.add(params.get(1));
-            rabbitMQProducer.publish(new IndexResult(1, results));
+            producer.produce(new IndexResult(1, results));
             log.info("Published to result queue : " + results);
         } catch (Exception e) {
             log.error(e.getMessage());
             List<Object> results = new ArrayList<>();
             results.add("error");
             results.add(e.getMessage());
-            rabbitMQProducer.publish(new IndexResult(-1, results));
+            producer.produce(new IndexResult(-1, results));
             log.info("Published to result queue : " + results);
         }
-
     }
+
 }

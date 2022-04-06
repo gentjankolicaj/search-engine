@@ -7,24 +7,23 @@ import org.search.engine.relational.dao.DocumentTokenDao;
 import org.search.engine.relational.domain.DocumentToken;
 import org.search.engine.relational.dto.command.Command;
 import org.search.engine.relational.dto.result.QueryResult;
-import org.search.engine.relational.producer.RabbitMQProducer;
+import org.search.engine.relational.producer.Producer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
 @Slf4j
 public class QueryServiceImpl implements QueryService {
 
-    private final RabbitMQProducer rabbitMQProducer;
+    private final Producer producer;
     private final DocumentTokenDao documentTokenDao;
     private final QueryBuilder queryBuilder;
 
     @Autowired
-    public QueryServiceImpl(RabbitMQProducer rabbitMQProducer, DocumentTokenDao documentTokenDao, QueryBuilder queryBuilder) {
-        this.rabbitMQProducer = rabbitMQProducer;
+    public QueryServiceImpl(Producer producer, DocumentTokenDao documentTokenDao, QueryBuilder queryBuilder) {
+        this.producer = producer;
         this.documentTokenDao = documentTokenDao;
         this.queryBuilder = queryBuilder;
     }
@@ -39,12 +38,13 @@ public class QueryServiceImpl implements QueryService {
                     .build();
             //Get document tokens
             List<DocumentToken> documentTokens = documentTokenDao.readAll(querySql);
-            rabbitMQProducer.publish(new QueryResult<>(2, documentTokens));
+            producer.produce(new QueryResult<>(2, documentTokens));
             log.info("Published to result queue : " + documentTokens);
         } catch (Exception e) {
             log.error(e.getMessage());
-            rabbitMQProducer.publish(new QueryResult<>(-2, Arrays.asList(e.getMessage())));
+            producer.produce(new QueryResult<>(-2, List.of(e.getMessage())));
             log.info("Published to result queue : " + e.getMessage());
         }
     }
+
 }

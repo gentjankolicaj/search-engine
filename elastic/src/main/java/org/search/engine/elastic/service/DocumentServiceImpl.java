@@ -6,7 +6,7 @@ import org.search.engine.elastic.domain.Document;
 import org.search.engine.elastic.dto.command.Command;
 import org.search.engine.elastic.dto.result.IndexResult;
 import org.search.engine.elastic.dto.result.QueryResult;
-import org.search.engine.elastic.producer.RabbitMQProducer;
+import org.search.engine.elastic.producer.Producer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +19,12 @@ import java.util.List;
 public class DocumentServiceImpl implements DocumentService{
 
     private final DocumentDao documentDao;
-    private final RabbitMQProducer rabbitMQProducer;
+    private final Producer producer;
 
     @Autowired
-    public DocumentServiceImpl(DocumentDao documentDao, RabbitMQProducer rabbitMQProducer) {
+    public DocumentServiceImpl(DocumentDao documentDao, Producer producer) {
         this.documentDao = documentDao;
-        this.rabbitMQProducer = rabbitMQProducer;
+        this.producer=producer;
     }
 
 
@@ -39,14 +39,14 @@ public class DocumentServiceImpl implements DocumentService{
             List<Object> results = new ArrayList<>();
             results.add("ok");
             results.add(params.get(1));
-            rabbitMQProducer.produce(new IndexResult(1, results));
+            producer.produce(new IndexResult(1, results));
             log.info("Published to result queue : " + results);
         } catch (Exception e) {
             log.error(e.getMessage());
             List<Object> results = new ArrayList<>();
             results.add("error");
             results.add(e.getMessage());
-            rabbitMQProducer.produce(new IndexResult(-1, results));
+            producer.produce(new IndexResult(-1, results));
             log.info("Published to result queue : " + results);
         }
 
@@ -61,11 +61,11 @@ public class DocumentServiceImpl implements DocumentService{
             List<String> params = command.getParams();
             String query=getQueryStr(params);
             List<Document> documents=documentDao.readAll(query);
-            rabbitMQProducer.produce(new QueryResult<>(2,documents));
+            producer.produce(new QueryResult<>(2,documents));
             log.info("Published to result queue : " + documents);
         } catch (Exception e) {
             log.error(e.getMessage());
-            rabbitMQProducer.produce(new QueryResult<>(-2, Arrays.asList(e.getMessage())));
+            producer.produce(new QueryResult<>(-2, Arrays.asList(e.getMessage())));
             log.info("Published to result queue : " + e.getMessage());
         }
     }
@@ -85,4 +85,5 @@ public class DocumentServiceImpl implements DocumentService{
         List<String> tokens=params.subList(2,params.size());
         return new Document(docId,tokens);
     }
+
 }
